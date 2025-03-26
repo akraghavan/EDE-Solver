@@ -51,12 +51,13 @@ def odeSystem(tTilde, y):
     phiClipped = np.clip(phiTilde, -1e8, 1e8)
     
     # Right-hand side of the second equation as per equation (33)
-    # Using scaled parameters and careful handling of large powers
+    # First term: -4λφ²ᵢₙφ³/T²ᵢₙ
     numerator = -bScaled * phiClipped**3
     
     # Only add second term if phi is small enough to avoid overflow
+    # Second term: -(βgT̃²φ/12)(βφ²ᵢₙφ²/μ²ν - 1)
     if abs(phiClipped) < 1e6:
-        secondTerm = cScaled * tTilde**2 * phiClipped**12 * (dScaled * phiClipped**2 - 1)
+        secondTerm = cScaled * tTilde**2 * phiClipped * (dScaled * phiClipped**2 - 1)
         numerator -= secondTerm
         
     d2phiDt2 = numerator / (a * tTilde**6)
@@ -176,7 +177,7 @@ def singularPerturbationAnalysis():
         # Using clipping to avoid numerical issues
         phiClipped = np.clip(phi, -1e6, 1e6)
         if abs(phiClipped) < 1e6:
-            damping = -cScaled * t**2 * phiClipped**12 * (dScaled * phiClipped**2 - 1) / (a * max(t, 1e-10)**6)
+            damping = -cScaled * t**2 * phiClipped * (dScaled * phiClipped**2 - 1) / (a * max(t, 1e-10)**6)
         else:
             damping = 0  # Skip calculation if phi is too large
         return [damping]
@@ -289,7 +290,7 @@ def analyzeParameterEffect():
             
             # Only add second term if phi is small enough to avoid overflow
             if abs(phiClipped) < 1e6:
-                secondTerm = cScaled * tTilde**2 * phiClipped**12 * (dScaled * phiClipped**2 - 1)
+                secondTerm = cScaled * tTilde**2 * phiClipped * (dScaled * phiClipped**2 - 1)
                 numerator -= secondTerm
                 
             d2phiDt2 = numerator / (aTemp * tTilde**6)
